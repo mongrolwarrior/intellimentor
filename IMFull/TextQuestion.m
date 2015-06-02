@@ -14,8 +14,7 @@
 
 - (void)viewDidLoad
 {
-    [super viewDidLoad];
-    
+    [super viewDidLoad];    
     
     NSString *dbString = [currentQuestion question];
     dbString = [dbString stringByReplacingOccurrencesOfString:@"<br>" withString:@"\n"];

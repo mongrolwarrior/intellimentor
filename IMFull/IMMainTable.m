@@ -182,6 +182,18 @@ NSTimer *timer;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    /*NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:groupID];
+     containerURL = [containerURL URLByAppendingPathComponent:[NSString stringWithFormat:@"Library/Caches/test.txt"]];
+*/
+    
+    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
+    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
+    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    
+    Questions *thisQuestion = questionListData[0];
+    NSLog(@"%@, %@", thisQuestion.question, thisQuestion.answer);
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"Answer\": \"%@\"}", thisQuestion.question, thisQuestion.answer] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    
     if (tableView == self.searchDisplayController.searchResultsTableView) {
         [self performSegueWithIdentifier: @"TextQuestion" sender: self];
     }

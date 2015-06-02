@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="AgC-eL-Hgc">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="7701"/>
+    </dependencies>
+    <scenes>
+        <!--Interface Controller-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="IMFull_WatchKit_App" customModuleProvider="target">
+                    <items>
+                        <label height="1" alignment="left" text="&lt;Question&gt;" numberOfLines="0" id="9mC-cJ-A9Q"/>
+                        <label alignment="left" text="&lt;Answer&gt;" numberOfLines="0" id="cXU-JW-eFC"/>
+                    </items>
+                    <connections>
+                        <outlet property="answerLabel" destination="cXU-JW-eFC" id="P5y-9V-L3s"/>
+                        <outlet property="questionLabel" destination="9mC-cJ-A9Q" id="csv-sd-zdJ"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="220" y="345"/>
+        </scene>
+    </scenes>
+</document>

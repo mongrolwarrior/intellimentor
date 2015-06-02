@@ -12,22 +12,34 @@
 	<dict>
 		<key>B3203D918D8A599CF64D742E39E10C5876B90265</key>
 		<string>github.com:mongrolwarrior/intellimentor</string>
+		<key>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</key>
+		<string>https://github.com/mongrolwarrior/intellimentor.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>IMFull.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>B3203D918D8A599CF64D742E39E10C5876B90265</key>
+		<string>../../../IMFull%20working%20copy</string>
+		<key>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>github.com:mongrolwarrior/intellimentor</string>
+	<string>https://github.com/mongrolwarrior/intellimentor.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>B3203D918D8A599CF64D742E39E10C5876B90265</string>
+	<string>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</string>
+			<key>IDESourceControlWCCName</key>
+			<string>IMFull%20working</string>
+		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
