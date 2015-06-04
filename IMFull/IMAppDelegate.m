@@ -9,6 +9,9 @@
 #import "IMAppDelegate.h"
 #import "Users.h" 
 #import "LoginViewController.h"
+#import "CoreDataHelper.h"
+#import "Questions.h"
+#import "AnswerLog.h"
 
 @implementation IMAppDelegate
 
@@ -176,5 +179,319 @@
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
+
+- (void)application:(UIApplication *)application handleWatchKitExtensionRequest:(NSDictionary *)userInfo reply:(void (^)(NSDictionary *))reply
+{
+    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
+    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
+    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"qid == %d", [(NSString *)userInfo[@"qid"] integerValue]];
+    NSMutableArray *questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    
+    Questions *newQuestion = questionListData[0];
+    if ([userInfo[@"accuracy"]  isEqual: @"true"])
+        [self answerIsTrue:newQuestion];
+    else
+        [self answerIsFalse:newQuestion];
+    
+    predicate = [NSPredicate predicateWithFormat:@"current == YES"];
+    questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    
+    newQuestion = questionListData[0];
+    
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", newQuestion.question, newQuestion.qPictureName, newQuestion.answer, newQuestion.aPictureName, newQuestion.qid] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+}
+
+
+//  Answer is true
+- (void)answerIsTrue:(Questions *)currentQuestion
+{
+    double correction;
+    if (currentQuestion.correction) {
+        correction = [currentQuestion.correction doubleValue];
+    }
+    else {
+        correction = 0.0;
+    }
+    NSTimeInterval dateTime;
+    NSTimeInterval dateLatency = [currentQuestion.nextdue timeIntervalSinceNow];
+    if (currentQuestion.lastanswered){
+        dateTime = [currentQuestion.lastanswered timeIntervalSinceNow];
+        currentQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:fmax((2 - correction), 1.1)*fabs(dateTime)];
+    }
+    else {
+        //   dateTime = (double)600;
+        currentQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:600];
+    }
+    currentQuestion.lastanswered = [NSDate date];
+    
+    AnswerLog *logInfo = [NSEntityDescription insertNewObjectForEntityForName:@"AnswerLog" inManagedObjectContext:self.managedObjectContext];
+    logInfo.qid = currentQuestion.qid;
+    logInfo.dateanswered = [NSDate date];
+    logInfo.accuracy = [NSNumber numberWithBool:true];
+    
+    NSError *error;
+    
+    if (![self.managedObjectContext save:&error])
+        NSLog(@"Failed to save nextdue with error: %@", [error domain]);
+    
+    if (dateLatency<-18000)
+    {
+        dateLatency = (double)300;
+        NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+        NSInteger intVal = [prefs integerForKey:@"timeLag"];
+        if (intVal>0)
+            intVal = intVal - 1;
+        [prefs setInteger:intVal forKey:@"timeLag"];
+        [prefs synchronize];
+        
+        
+    }
+    else {
+        if (dateLatency < 0) {
+            NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+            NSInteger intVal = [prefs integerForKey:@"timeLag"];
+            if (intVal>0)
+                intVal = intVal - 1;
+            [prefs setInteger:intVal forKey:@"timeLag"];
+            [prefs synchronize];
+            dateLatency = (double)(600 + dateLatency/60);
+        }
+        else {
+            NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+            NSInteger intVal = [prefs integerForKey:@"timeLag"];
+            
+            // ATTEMPT TO AUTOMATE NEW QUESTIONS; DO NEW AT TIMELAG = 10, 20, 30
+            if ([prefs objectForKey:@"lastNewQuestion"]&&[prefs integerForKey:@"countNewQuestions"])
+                // eg if there is a date of the last new question initiated and a count of questions initiated today
+            {
+                if ([[NSDateFormatter localizedStringFromDate:[prefs objectForKey:@"lastNewQuestion"] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]])
+                    // eg if the date of the last new question initiated is equal to today's date
+                {
+                    if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"countNewQuestions"]>=10)
+                    {
+                        // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
+                        NSPersistentStoreCoordinator *psc = [self.managedObjectContext persistentStoreCoordinator];
+                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] init];
+                        [newContext setPersistentStoreCoordinator:psc];
+                        
+                        //         NSMutableArray *nCQuestions = [[NSMutableArray alloc] init];
+                        
+                        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == NO"];
+                        NSMutableArray *nCQuestions = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"qid" andSortAscending:NO andContext:self.managedObjectContext];
+                        
+                        Questions *activateQuestion = [nCQuestions objectAtIndex:0];
+                        
+                        activateQuestion.current = [NSNumber numberWithBool:true];
+                        activateQuestion.lastanswered = [NSDate dateWithTimeIntervalSinceNow:((660+60*intVal)-300)];
+                        activateQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:(660+60*intVal)];
+                        
+                        // Add 1 to count of new questions initiated today
+                        [prefs setInteger:[prefs integerForKey:@"countNewQuestions"]+1 forKey:@"countNewQuestions"];
+                    }
+                }
+                else
+                {
+                    // restart count as must be a new day
+                    [prefs setInteger:1 forKey:@"countNewQuestions"];
+                    [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
+                }
+            }
+            else
+            {
+                // eg if there is no date for the last new question initiated, or no count of questions initiated today
+                [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
+                [prefs setInteger:1 forKey:@"countNewQuestions"];
+            }
+            
+            intVal = intVal + 1;
+            [prefs setInteger:intVal forKey:@"timeLag"];
+            [prefs synchronize];
+            dateLatency = (double)(600 + 60 * intVal);
+        }
+    }
+    
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    
+    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.timeZone = [NSTimeZone defaultTimeZone];
+    
+    
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSInteger intVal = [prefs integerForKey:@"timeLag"];
+    
+    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertAction = [NSString stringWithFormat:@"View"];
+    
+    localNotification.soundName = UILocalNotificationDefaultSoundName;
+    
+    localNotification.alertLaunchImage = nil;
+    
+    // Schedule it with the app
+    [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+}
+
+//  Answer is false
+- (void)answerIsFalse:(Questions *)currentQuestion
+{
+    NSTimeInterval dateTime;
+    NSTimeInterval dateLatency = [currentQuestion.nextdue timeIntervalSinceNow];
+    if (currentQuestion.lastanswered){
+        dateTime = [currentQuestion.lastanswered timeIntervalSinceNow];
+        currentQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:0.1*fabs(dateTime)];
+    }
+    else {
+        //    dateTime = (double)600;
+        currentQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:600];
+    }
+    currentQuestion.lastanswered = [NSDate date];
+    
+    if (currentQuestion.correction) {
+        currentQuestion.correction = [NSNumber numberWithDouble:[currentQuestion.correction doubleValue] + 0.04];
+    }
+    
+    AnswerLog *logInfo = [NSEntityDescription insertNewObjectForEntityForName:@"AnswerLog" inManagedObjectContext:self.managedObjectContext];
+    logInfo.qid = currentQuestion.qid;
+    logInfo.dateanswered = [NSDate date];
+    logInfo.accuracy = [NSNumber numberWithBool:false];
+    
+    NSError *error;
+    
+    if (![self.managedObjectContext save:&error])
+        NSLog(@"Failed to save nextdue with error: %@", [error domain]);
+    
+    if (dateLatency<-18000)
+    {
+        dateLatency = (double)300;
+        NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+        NSInteger intVal = [prefs integerForKey:@"timeLag"];
+        if (intVal>0)
+            intVal = intVal - 1;
+        [prefs setInteger:intVal forKey:@"timeLag"];
+        [prefs synchronize];
+    }
+    else {
+        if (dateLatency < 0) {
+            NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+            NSInteger intVal = [prefs integerForKey:@"timeLag"];
+            if (intVal>0)
+                intVal = intVal - 1;
+            [prefs setInteger:intVal forKey:@"timeLag"];
+            [prefs synchronize];
+            dateLatency = (double)(600 + dateLatency/60);
+        }
+        else {
+            NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+            NSInteger intVal = [prefs integerForKey:@"timeLag"];
+            
+            // ATTEMPT TO AUTOMATE NEW QUESTIONS; DO NEW AT TIMELAG = 10, 20, 30
+            
+            if ([prefs objectForKey:@"lastNewQuestion"]&&[prefs integerForKey:@"countNewQuestions"])
+                // eg if there is a date of the last new question initiated and a count of questions initiated today
+            {
+                if ([[NSDateFormatter localizedStringFromDate:[prefs objectForKey:@"lastNewQuestion"] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]])
+                    // eg if the date of the last new question initiated is equal to today's date
+                {
+                    if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"countNewQuestions"]>=10)
+                    {
+                        /*       NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == NO"];
+                         noncurrentQuestions = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"qid" andSortAscending:NO andContext:managedObjectContext];
+                         */
+                        
+                        
+                        // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
+                        NSPersistentStoreCoordinator *psc = [self.managedObjectContext persistentStoreCoordinator];
+                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] init];
+                        [newContext setPersistentStoreCoordinator:psc];
+                        
+                        //          NSMutableArray *nCQuestions = [[NSMutableArray alloc] init];
+                        
+                        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == NO"];
+                        NSMutableArray *nCQuestions = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"qid" andSortAscending:NO andContext:self.managedObjectContext];
+                        
+                        Questions *activateQuestion = [nCQuestions objectAtIndex:0];
+                        
+                        activateQuestion.current = [NSNumber numberWithBool:true];
+                        activateQuestion.lastanswered = [NSDate dateWithTimeIntervalSinceNow:((660+60*intVal)-300)];
+                        activateQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:(660+60*intVal)];
+                        
+                        // Add 1 to count of new questions initiated today
+                        [prefs setInteger:[prefs integerForKey:@"countNewQuestions"]+1 forKey:@"countNewQuestions"];
+                    }
+                }
+                else
+                {
+                    // restart count as must be a new day; uses 1 so not dividing by 0
+                    [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
+                    [prefs setInteger:1 forKey:@"countNewQuestions"];
+                }
+            }
+            else
+            {
+                // eg if there is no date for the last new question initiated, or no count of questions initiated today
+                [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
+                [prefs setInteger:1 forKey:@"countNewQuestions"];
+            }
+            /*          NSDate *dateNewQuestion;
+             NSInteger intNewQuestionsToday;
+             if ([prefs objectForKey:@"lastNewQuestion"]) {
+             dateNewQuestion = [prefs objectForKey:@"lastNewQuestion"];
+             }
+             if ([prefs integerForKey:@"countNewQuestions"]) {
+             intNewQuestionsToday = [prefs integerForKey:@"countNewQuestions"];
+             }
+             if (dateNewQuestion==[NSDate date]) {
+             if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"intNewQuestionsToday"]>=10) {
+             UIAlertView *alert = [[UIAlertView alloc]initWithTitle: @"Alert Title here"
+             message: @"Alert Message here"
+             delegate: nil
+             cancelButtonTitle:@"Cancel"
+             otherButtonTitles:@"OK",nil];
+             
+             
+             [alert show];
+             }
+             if ([prefs integerForKey:@"intNewQuestionsToday"]) {
+             [prefs setInteger:[prefs integerForKey:@"intNewQuestionsToday"]+1 forKey:@"intNewQuestionsToday"];
+             }
+             else
+             [prefs setInteger:0 forKey:@"intNewQuestionsToday"];
+             }*/
+            
+            // RESUME ORIGINAL
+            intVal = intVal + 1;
+            [prefs setInteger:intVal forKey:@"timeLag"];
+            [prefs synchronize];
+            
+            dateLatency = (double)(600 + 60 * intVal);
+        }
+    }
+    
+    if (![self.managedObjectContext save:&error])
+        NSLog(@"Failed to save nextdue with error: %@", [error domain]);
+    
+    NSString *dateString = [NSDateFormatter localizedStringFromDate:currentQuestion.nextdue dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterFullStyle];
+    
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    
+    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.timeZone = [NSTimeZone defaultTimeZone];
+    
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSInteger intVal = [prefs integerForKey:@"timeLag"];
+    
+    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertAction = [NSString stringWithFormat:@"View"];
+    localNotification.soundName = UILocalNotificationDefaultSoundName;
+    
+    localNotification.alertLaunchImage = nil;
+    
+    // Schedule it with the app
+    [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+}
+
 
 @end

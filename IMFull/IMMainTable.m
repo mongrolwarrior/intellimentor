@@ -29,6 +29,14 @@ NSTimer *timer;
     
     timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(readDataForTable) userInfo:nil repeats:YES];
     // replaced by NSTIME repeating function above - "[self readDataForTable];"
+    
+    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
+    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
+    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    
+    Questions *thisQuestion = questionListData[0];
+    NSLog(@"%@, %@, %@", thisQuestion.question, thisQuestion.answer, thisQuestion.qid.stringValue);
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", thisQuestion.question, thisQuestion.qPictureName, thisQuestion.answer, thisQuestion.aPictureName, thisQuestion.qid.stringValue] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -191,8 +199,8 @@ NSTimer *timer;
     NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
     
     Questions *thisQuestion = questionListData[0];
-    NSLog(@"%@, %@", thisQuestion.question, thisQuestion.answer);
-    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"Answer\": \"%@\"}", thisQuestion.question, thisQuestion.answer] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    NSLog(@"%@, %@, %@", thisQuestion.question, thisQuestion.answer, thisQuestion.qid.stringValue);
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", thisQuestion.question, thisQuestion.qPictureName, thisQuestion.answer, thisQuestion.aPictureName, thisQuestion.qid.stringValue] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
     
     if (tableView == self.searchDisplayController.searchResultsTableView) {
         [self performSegueWithIdentifier: @"TextQuestion" sender: self];

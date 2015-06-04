@@ -7,20 +7,16 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>3B94EA15-1841-48C0-BCAC-6B13BDC97EC0</string>
 	<key>IDESourceControlProjectName</key>
-	<string>IMFull</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>B3203D918D8A599CF64D742E39E10C5876B90265</key>
-		<string>github.com:mongrolwarrior/intellimentor</string>
 		<key>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</key>
 		<string>https://github.com/mongrolwarrior/intellimentor.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>IMFull.xcodeproj</string>
+	<string>IMFull.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>B3203D918D8A599CF64D742E39E10C5876B90265</key>
-		<string>../../../IMFull%20working%20copy</string>
 		<key>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</key>
 		<string>../..</string>
 	</dict>
@@ -39,14 +35,6 @@
 			<string>D2A661016A9C7492F3CD67A0504C9D8C4BC89523</string>
 			<key>IDESourceControlWCCName</key>
 			<string>IMFull%20working</string>
-		</dict>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>B3203D918D8A599CF64D742E39E10C5876B90265</string>
-			<key>IDESourceControlWCCName</key>
-			<string>IMFull%20working%20copy</string>
 		</dict>
 	</array>
 </dict>

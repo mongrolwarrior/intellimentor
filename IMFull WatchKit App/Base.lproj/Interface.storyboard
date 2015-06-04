@@ -10,12 +10,32 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="IMFull_WatchKit_App" customModuleProvider="target">
                     <items>
-                        <label height="1" alignment="left" text="&lt;Question&gt;" numberOfLines="0" id="9mC-cJ-A9Q"/>
-                        <label alignment="left" text="&lt;Answer&gt;" numberOfLines="0" id="cXU-JW-eFC"/>
+                        <button width="1" alignment="left" title="Button" id="ML4-Ir-zYr">
+                            <connections>
+                                <action selector="showAnswerButton" destination="AgC-eL-Hgc" id="Yzc-Ay-WNC"/>
+                            </connections>
+                        </button>
+                        <label width="1" alignment="left" text="Show Answer" textAlignment="center" numberOfLines="0" id="ILz-ky-feU"/>
+                        <imageView alignment="left" hidden="YES" id="qPF-lV-KjD"/>
                     </items>
+                    <menu key="menu" id="yMD-3P-WRZ">
+                        <items>
+                            <menuItem title="Correct" icon="accept" id="C7V-pj-V7H">
+                                <connections>
+                                    <action selector="correctAnswer" destination="AgC-eL-Hgc" id="c43-5Y-Cnm"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Incorrect" icon="block" id="kOH-F2-UJr">
+                                <connections>
+                                    <action selector="incorrectAnswer" destination="AgC-eL-Hgc" id="3Rc-9Y-9Tn"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
                     <connections>
-                        <outlet property="answerLabel" destination="cXU-JW-eFC" id="P5y-9V-L3s"/>
-                        <outlet property="questionLabel" destination="9mC-cJ-A9Q" id="csv-sd-zdJ"/>
+                        <outlet property="questionButton" destination="ML4-Ir-zYr" id="TPk-cZ-awM"/>
+                        <outlet property="questionImage" destination="qPF-lV-KjD" id="W3g-pg-xvG"/>
+                        <outlet property="questionLabel" destination="ILz-ky-feU" id="gch-HE-EjF"/>
                     </connections>
                 </controller>
             </objects>
