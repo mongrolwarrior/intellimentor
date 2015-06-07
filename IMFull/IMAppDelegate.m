@@ -29,6 +29,8 @@
     // Get a reference to the stardard user defaults
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     
+    
+    
     // Check if the app has run before by checking a key in user defaults
     if ([prefs boolForKey:@"hasRunBefore"] != YES)
     {
@@ -46,6 +48,32 @@
         if (![self.managedObjectContext save:&error])
             NSLog(@"Failed to add default user with error: %@", [error domain]);
     }
+    
+    // Register Notification to allow custom notification on apple watch, as per: http://basememara.com/creating-notifications-from-watchkit-in-swift/
+    // Notification category
+    
+    UIMutableUserNotificationCategory *mainCategory = [[UIMutableUserNotificationCategory alloc] init];
+    mainCategory.identifier = @"qDue";
+    
+    [application registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:[NSSet setWithObjects:mainCategory, nil]]];
+
+    /*var mainCategory = UIMutableUserNotificationCategory()
+    mainCategory.identifier = "mainCategory"
+    
+    let defaultActions = [snoozeAction]
+    let minimalActions = [snoozeAction]
+    
+    mainCategory.setActions(defaultActions, forContext: .Default)
+    mainCategory.setActions(minimalActions, forContext: .Minimal)
+    
+    // Configure notifications
+    let notificationSettings = UIUserNotificationSettings(
+                                                          forTypes: .Alert | .Badge | .Sound,
+                                                          categories: NSSet(objects: mainCategory) as Set<NSObject>)
+    
+    // Register notifications
+    application.sharedApplication().registerUserNotificationSettings(notificationSettings)*/
+    
     
     return YES;
 }
@@ -110,6 +138,82 @@
     return __managedObjectContext;
 }
 
+
+-(void)processJsonFile
+{
+    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
+    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
+    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == YES"];
+    NSMutableArray *questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    
+    Questions *newQuestion;
+    
+    for (int i=0; i<15; i++) {
+        Questions *loopQuestion = questionListData[i];
+        
+        NSComparisonResult result = [[NSDate date] compare:loopQuestion.nextdue]; // comparing two dates; will be NSOrderedAscending if nextdue is later than now
+        
+        if(!(result==NSOrderedAscending && [[NSDateFormatter localizedStringFromDate:loopQuestion.lastanswered dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]]))
+            // if not (next due in future, and last answered is today's date) can ask question in apple watch
+        {
+            newQuestion = loopQuestion;
+            break;
+        }
+    }
+    
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", [newQuestion.question stringByReplacingOccurrencesOfString:@"\n" withString:@"<br/>"], newQuestion.qPictureName, [newQuestion.answer stringByReplacingOccurrencesOfString:@"\n" withString:@"<br/>"], newQuestion.aPictureName, newQuestion.qid] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (!ok)
+        NSLog(@"Failed to write question.json file in IMAppDelegate.m - handleWatchKitExtensionRequest");
+    if (newQuestion.qPictureName.length > 0) {
+        NSString *questionPicturePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[@"/" stringByAppendingString:newQuestion.qPictureName]];
+        NSURL *questionPictureURL = [NSURL fileURLWithPath:questionPicturePath];
+        
+        BOOL questionPictureExists = [questionPictureURL checkResourceIsReachableAndReturnError:nil];
+        
+        if (questionPictureExists){
+            NSError *error;
+            NSURL *fileInSharedContainerURL = [sharedContainerURL URLByAppendingPathComponent:newQuestion.qPictureName];
+            BOOL success = [[NSFileManager defaultManager] copyItemAtURL:questionPictureURL toURL:fileInSharedContainerURL error:&error];
+            NSLog(@"storeURL: %@", questionPicturePath);
+            NSLog(@"sharedContainerURL: %@", sharedContainerURL);
+            if (success == YES)
+            {
+                NSLog(@"Copied");
+            }
+            else
+            {
+                NSLog(@"Not Copied %@", error);
+            }
+        }
+    }
+    
+    if (newQuestion.aPictureName.length > 0)
+    {
+        NSString *answerPicturePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[@"/" stringByAppendingString:newQuestion.aPictureName]];
+        NSURL *answerPictureURL = [NSURL fileURLWithPath:answerPicturePath];
+        
+        BOOL answerPictureExists = [answerPictureURL checkResourceIsReachableAndReturnError:nil];
+        
+        if (answerPictureExists){
+            NSError *error;
+            NSURL *fileInSharedContainerURL = [sharedContainerURL URLByAppendingPathComponent:newQuestion.aPictureName];
+            BOOL success = [[NSFileManager defaultManager] copyItemAtURL:answerPictureURL toURL:fileInSharedContainerURL error:&error];
+            NSLog(@"storeURL: %@", answerPicturePath);
+            NSLog(@"sharedContainerURL: %@", sharedContainerURL);
+            if (success == YES)
+            {
+                NSLog(@"Copied");
+            }
+            else
+            {
+                NSLog(@"Not Copied %@", error);
+            }
+        }
+    }
+    
+}
 // Returns the managed object model for the application.
 // If the model doesn't already exist, it is created from the application's model.
 - (NSManagedObjectModel *)managedObjectModel
@@ -182,25 +286,53 @@
 
 - (void)application:(UIApplication *)application handleWatchKitExtensionRequest:(NSDictionary *)userInfo reply:(void (^)(NSDictionary *))reply
 {
+    
+    // Temporary fix, I hope.
+    // --------------------
+    __block UIBackgroundTaskIdentifier bogusWorkaroundTask;
+    bogusWorkaroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+        [[UIApplication sharedApplication] endBackgroundTask:bogusWorkaroundTask];
+    }];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [[UIApplication sharedApplication] endBackgroundTask:bogusWorkaroundTask];
+    });
+    // --------------------
+    
+    __block UIBackgroundTaskIdentifier realBackgroundTask;
+    realBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+        reply(nil);
+        [[UIApplication sharedApplication] endBackgroundTask:realBackgroundTask];
+    }];
+    
+    // Kick off a network request, heavy processing work, etc.
+    
+    // Return any data you need to, obviously.
+    
+    
     NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
     NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
     NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    NSMutableArray *questionListData;
+    NSPredicate *predicate;
+    Questions *newQuestion;
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"qid == %d", [(NSString *)userInfo[@"qid"] integerValue]];
-    NSMutableArray *questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    BOOL jsonFileExists = [docURL checkResourceIsReachableAndReturnError:nil];
     
-    Questions *newQuestion = questionListData[0];
-    if ([userInfo[@"accuracy"]  isEqual: @"true"])
-        [self answerIsTrue:newQuestion];
-    else
-        [self answerIsFalse:newQuestion];
+    if (jsonFileExists && ([userInfo[@"accuracy"] isEqual: @"true"] || [userInfo[@"accuracy"] isEqual:@"false"])) {
+        predicate = [NSPredicate predicateWithFormat:@"qid == %d", [(NSString *)userInfo[@"qid"] integerValue]];
+        questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+        
+        newQuestion = questionListData[0];
+        if ([userInfo[@"accuracy"]  isEqual: @"true"])
+            [self answerIsTrue:newQuestion];
+        else if ([userInfo[@"accuracy"]  isEqual: @"false"])
+            [self answerIsFalse:newQuestion];
+    }
     
-    predicate = [NSPredicate predicateWithFormat:@"current == YES"];
-    questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    [self processJsonFile];
     
-    newQuestion = questionListData[0];
-    
-    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", newQuestion.question, newQuestion.qPictureName, newQuestion.answer, newQuestion.aPictureName, newQuestion.qid] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    reply(nil);
+    [[UIApplication sharedApplication] endBackgroundTask:realBackgroundTask];
 }
 
 
@@ -322,17 +454,40 @@
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSInteger intVal = [prefs integerForKey:@"timeLag"];
     
-    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertBody = [NSString stringWithFormat:@"%ld-%ld", (long)intVal, (long)dateLatency];
     localNotification.alertAction = [NSString stringWithFormat:@"View"];
     
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     
     localNotification.alertLaunchImage = nil;
     
+    localNotification.category = @"qDue";
+    localNotification.userInfo = [NSDictionary dictionaryWithObjectsAndKeys: @"question", @"Where don't babies come from?", nil];
+    
     // Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
 }
-
+/*
+func scheduleTimerNotificationWithUserInfo(userInfo: [NSObject : AnyObject]!) {
+    
+    let application = UIApplication.sharedApplication()
+    if (application.currentUserNotificationSettings().types & UIUserNotificationType.Alert) != nil {
+        let message = userInfo["message"] as! String
+        let title = userInfo["title"] as! String
+        let timer = userInfo["timer"] as! Int
+        let fireDate = NSDate(timeIntervalSinceNow: NSTimeInterval(timer * 60))
+        
+        let notification = UILocalNotification()
+        notification.fireDate = fireDate
+        notification.alertTitle = title
+        notification.alertBody = message
+        notification.soundName = UILocalNotificationDefaultSoundName
+        notification.category = "timer"
+        notification.userInfo = userInfo
+        
+        application.scheduleLocalNotification(notification)
+    }
+}*/
 //  Answer is false
 - (void)answerIsFalse:(Questions *)currentQuestion
 {
@@ -396,11 +551,6 @@
                 {
                     if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"countNewQuestions"]>=10)
                     {
-                        /*       NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == NO"];
-                         noncurrentQuestions = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"qid" andSortAscending:NO andContext:managedObjectContext];
-                         */
-                        
-                        
                         // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
                         NSPersistentStoreCoordinator *psc = [self.managedObjectContext persistentStoreCoordinator];
                         NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] init];
@@ -434,31 +584,6 @@
                 [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
                 [prefs setInteger:1 forKey:@"countNewQuestions"];
             }
-            /*          NSDate *dateNewQuestion;
-             NSInteger intNewQuestionsToday;
-             if ([prefs objectForKey:@"lastNewQuestion"]) {
-             dateNewQuestion = [prefs objectForKey:@"lastNewQuestion"];
-             }
-             if ([prefs integerForKey:@"countNewQuestions"]) {
-             intNewQuestionsToday = [prefs integerForKey:@"countNewQuestions"];
-             }
-             if (dateNewQuestion==[NSDate date]) {
-             if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"intNewQuestionsToday"]>=10) {
-             UIAlertView *alert = [[UIAlertView alloc]initWithTitle: @"Alert Title here"
-             message: @"Alert Message here"
-             delegate: nil
-             cancelButtonTitle:@"Cancel"
-             otherButtonTitles:@"OK",nil];
-             
-             
-             [alert show];
-             }
-             if ([prefs integerForKey:@"intNewQuestionsToday"]) {
-             [prefs setInteger:[prefs integerForKey:@"intNewQuestionsToday"]+1 forKey:@"intNewQuestionsToday"];
-             }
-             else
-             [prefs setInteger:0 forKey:@"intNewQuestionsToday"];
-             }*/
             
             // RESUME ORIGINAL
             intVal = intVal + 1;
@@ -472,8 +597,6 @@
     if (![self.managedObjectContext save:&error])
         NSLog(@"Failed to save nextdue with error: %@", [error domain]);
     
-    NSString *dateString = [NSDateFormatter localizedStringFromDate:currentQuestion.nextdue dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterFullStyle];
-    
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
@@ -483,11 +606,13 @@
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSInteger intVal = [prefs integerForKey:@"timeLag"];
     
-    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertBody = [NSString stringWithFormat:@"%ld-%d", (long)intVal, (int)dateLatency];
     localNotification.alertAction = [NSString stringWithFormat:@"View"];
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     
     localNotification.alertLaunchImage = nil;
+    
+    localNotification.category = @"qDue";
     
     // Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];

@@ -14,7 +14,6 @@
 		351A684D15CE704F0032B25D /* TextQuestion.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A684C15CE704F0032B25D /* TextQuestion.m */; };
 		351A685015CFD0900032B25D /* TextAnswer.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A684F15CFD0900032B25D /* TextAnswer.m */; };
 		352AD8A91B1DC6740049E31B /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AD8A81B1DC6740049E31B /* InterfaceController.swift */; };
-		352AD8AB1B1DC6740049E31B /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AD8AA1B1DC6740049E31B /* NotificationController.swift */; };
 		352AD8AD1B1DC6740049E31B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8AC1B1DC6740049E31B /* Images.xcassets */; };
 		352AD8B11B1DC6740049E31B /* IMFull WatchKit App.app in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8B01B1DC6740049E31B /* IMFull WatchKit App.app */; };
 		352AD8B91B1DC6740049E31B /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8B71B1DC6740049E31B /* Interface.storyboard */; };
@@ -38,6 +37,7 @@
 		3563FF9815D680D7004C31D3 /* AnswerLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 3563FF9715D680D7004C31D3 /* AnswerLog.m */; };
 		3563FF9B15D680D7004C31D3 /* Questions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3563FF9A15D680D7004C31D3 /* Questions.m */; };
 		3563FFA115D68279004C31D3 /* NewQuestions.json in Resources */ = {isa = PBXBuildFile; fileRef = 3563FFA015D68279004C31D3 /* NewQuestions.json */; };
+		35675ACC1B22F05A0091E456 /* QuestionDueNotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35675ACB1B22F05A0091E456 /* QuestionDueNotificationController.swift */; };
 		3575EA0E186864DD00F269C2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3575EA0D186864DD00F269C2 /* Default-568h@2x.png */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +88,6 @@
 		352AD8A61B1DC6740049E31B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		352AD8A71B1DC6740049E31B /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		352AD8A81B1DC6740049E31B /* InterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
-		352AD8AA1B1DC6740049E31B /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
 		352AD8AC1B1DC6740049E31B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		352AD8B01B1DC6740049E31B /* IMFull WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IMFull WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		352AD8B61B1DC6740049E31B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -126,6 +125,8 @@
 		3563FF9915D680D7004C31D3 /* Questions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Questions.h; path = IMFull/Questions.h; sourceTree = "<group>"; };
 		3563FF9A15D680D7004C31D3 /* Questions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Questions.m; path = IMFull/Questions.m; sourceTree = "<group>"; };
 		3563FFA015D68279004C31D3 /* NewQuestions.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = NewQuestions.json; sourceTree = "<group>"; };
+		35675ACA1B22E13B0091E456 /* IMFullNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = IMFullNotificationPayload.apns; sourceTree = "<group>"; };
+		35675ACB1B22F05A0091E456 /* QuestionDueNotificationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuestionDueNotificationController.swift; sourceTree = "<group>"; };
 		3575EA0D186864DD00F269C2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -157,7 +158,7 @@
 			children = (
 				352AD8C71B1DCE190049E31B /* IMFull WatchKit Extension.entitlements */,
 				352AD8A81B1DC6740049E31B /* InterfaceController.swift */,
-				352AD8AA1B1DC6740049E31B /* NotificationController.swift */,
+				35675ACB1B22F05A0091E456 /* QuestionDueNotificationController.swift */,
 				352AD8AC1B1DC6740049E31B /* Images.xcassets */,
 				352AD8A51B1DC6740049E31B /* Supporting Files */,
 			);
@@ -172,6 +173,7 @@
 				352AD8A71B1DC6740049E31B /* PushNotificationPayload.apns */,
 				352AD8C81B1DDD690049E31B /* IMFull-Bridging-Header.h */,
 				352AD8C91B1DDD690049E31B /* IMFull WatchKit App-Bridging-Header.h */,
+				35675ACA1B22E13B0091E456 /* IMFullNotificationPayload.apns */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -346,7 +348,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = IM;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "University of Queensland";
 				TargetAttributes = {
 					352AD8A21B1DC6740049E31B = {
@@ -430,8 +432,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				352AD8CC1B1DDD6A0049E31B /* SwiftyJSON.swift in Sources */,
-				352AD8AB1B1DC6740049E31B /* NotificationController.swift in Sources */,
 				352AD8A91B1DC6740049E31B /* InterfaceController.swift in Sources */,
+				35675ACC1B22F05A0091E456 /* QuestionDueNotificationController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -627,6 +629,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -662,6 +665,7 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -727,6 +731,7 @@
 				352AD8C21B1DC6740049E31B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		352AD8C41B1DC6740049E31B /* Build configuration list for PBXNativeTarget "IMFull WatchKit Extension" */ = {
 			isa = XCConfigurationList;
@@ -735,6 +740,7 @@
 				352AD8C01B1DC6740049E31B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		352F487715CBF53B00E3B5E1 /* Build configuration list for PBXProject "IMFull" */ = {
 			isa = XCConfigurationList;

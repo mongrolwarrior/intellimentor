@@ -163,7 +163,7 @@
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSInteger intVal = [prefs integerForKey:@"timeLag"];
     
-    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertBody = [NSString stringWithFormat:@"%ld-%d", (long)intVal, (int)dateLatency];
     localNotification.alertAction = [NSString stringWithFormat:@"View"];	
     
     localNotification.soundName = UILocalNotificationDefaultSoundName;
@@ -327,7 +327,7 @@
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSInteger intVal = [prefs integerForKey:@"timeLag"];
     
-    localNotification.alertBody = [NSString stringWithFormat:@"%d-%d", intVal, (int)dateLatency];
+    localNotification.alertBody = [NSString stringWithFormat:@"%ld-%d", (long)intVal, (int)dateLatency];
     localNotification.alertAction = [NSString stringWithFormat:@"View"];
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     

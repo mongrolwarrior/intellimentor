@@ -32,37 +32,48 @@ class InterfaceController: WKInterfaceController {
     }
     
     func refreshControls() {
-        sharedContainerURL = NSFileManager.defaultManager().containerURLForSecurityApplicationGroupIdentifier(kAppGroupIdentifier)!
+        sharedContainerURL = NSFileManager.defaultManager().containerURLForSecurityApplicationGroupIdentifier(kAppGroupIdentifier)! // eg shared documents
         docURL = sharedContainerURL.URLByAppendingPathComponent("question.json")
         
         json = JSON(data: NSData(contentsOfURL: docURL!)!)
         
         qid = json!["qid"].stringValue
         
-        questionLabel.setText(json!["Question"].stringValue)
+        let questionString = json!["Question"].stringValue
+        
+        questionLabel.setText(questionString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
         questionButton.setTitle("Show Answer")
         
         questionImage.setHidden(true)
         
-        if (!json!["qImage"].stringValue.isEmpty) {
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-            let getImagePath = documentsPath.stringByAppendingPathComponent(json!["qImage"].stringValue)
-            let img = UIImage(contentsOfFile: getImagePath)
-            questionImage.setImage(img)
-            questionImage.setHidden(false)
+        if json!["qImage"].stringValue == "(null)" {
+            json!["qImage"].stringValue = ""
         }
+        
+        if json!["aImage"].stringValue == "(null)" {
+            json!["aImage"].stringValue == ""
+        }
+        
+        if (!json!["qImage"].stringValue.isEmpty) {
+        //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
+            let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["qImage"].stringValue)
+            
+            if let data = NSData(contentsOfURL: getImagePath) { //make sure your image in this url does exist, otherwise unwrap in a if let check            
+                var img = UIImage(data: data)
+                questionImage.setImage(img)
+                questionImage.setHidden(false)
+            }
+        }
+        questionOrAnswer = true
     }
 
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
-        /*
-        NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
-        NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
-        NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
-        
-        BOOL ok = [@"{\"Question\": \"This is the question?\", \"Answer\": \"This is the answer.\"}" writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];*/
-        self.refreshControls()
+        let requestInfo: [NSObject: AnyObject] = [NSString(string: "accuracy"): NSString(string: "start")]
+        WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
+            self.refreshControls()
+        }
     }
 
     override func didDeactivate() {
@@ -73,12 +84,16 @@ class InterfaceController: WKInterfaceController {
     @IBAction func showAnswerButton() {
         if questionOrAnswer {
             questionOrAnswer = !questionOrAnswer
-            questionLabel.setText(json!["Answer"].stringValue)
+            
+            let answerString = json!["Answer"].stringValue
+            questionLabel.setText(answerString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
             
             if (!json!["aImage"].stringValue.isEmpty) {
-                let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-                let getImagePath = documentsPath.stringByAppendingPathComponent(json!["aImage"].stringValue)
-                let img = UIImage(contentsOfFile: getImagePath)
+                //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
+                let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["aImage"].stringValue)
+                
+                let data = NSData(contentsOfURL: getImagePath) //make sure your image in this url does exist, otherwise unwrap in a if let check
+                var img = UIImage(data: data!)
                 questionImage.setImage(img)
                 questionImage.setHidden(false)
             } else {
@@ -87,11 +102,16 @@ class InterfaceController: WKInterfaceController {
             questionButton.setTitle("Show Question")
         } else {
             questionOrAnswer = !questionOrAnswer
-            questionLabel.setText(json!["Question"].stringValue)
+            
+            let questionString = json!["Question"].stringValue
+            questionLabel.setText(questionString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
+            
             if (!json!["qImage"].stringValue.isEmpty) {
-                let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-                let getImagePath = documentsPath.stringByAppendingPathComponent(json!["qImage"].stringValue)
-                let img = UIImage(contentsOfFile: getImagePath)
+                //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
+                let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["qImage"].stringValue)
+                
+                let data = NSData(contentsOfURL: getImagePath) //make sure your image in this url does exist, otherwise unwrap in a if let check
+                var img = UIImage(data: data!)
                 questionImage.setImage(img)
                 questionImage.setHidden(false)
             } else {
@@ -103,18 +123,33 @@ class InterfaceController: WKInterfaceController {
     }
     
     @IBAction func correctAnswer() {
-        let qidString = "qid"
-        let requestInfo: [NSObject: AnyObject] = [NSString(string: "qid"): NSString(string: qid!), NSString(string: "accuracy"): NSString(string: "true")]
+        let requestInfo: [NSObject: AnyObject] = [
+            "qid": qid!,
+            "accuracy": "true"
+        ]
         WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
             self.refreshControls()
         }
     }
     
     @IBAction func incorrectAnswer() {
-        let qidString = "qid"
         let requestInfo: [NSObject: AnyObject] = [NSString(string: "qid"): NSString(string: qid!), NSString(string: "accuracy"): NSString(string: "false")]
         WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
             self.refreshControls()
         }
+    }
+    
+    override func handleActionWithIdentifier(identifier: String?, forLocalNotification localNotification: UILocalNotification) {
+        if let userInfo = localNotification.userInfo {
+            processActionWithIdentifier(identifier, withUserInfo: userInfo)
+        }
+    }
+    
+    override func handleActionWithIdentifier(identifier: String?, forRemoteNotification remoteNotification: [NSObject : AnyObject]) {
+        processActionWithIdentifier(identifier, withUserInfo: remoteNotification)
+    }
+    
+    func processActionWithIdentifier(identifier: String?, withUserInfo userInfo: [NSObject: AnyObject]) {
+        pushControllerWithName("mainInterface", context: nil)
     }
 }

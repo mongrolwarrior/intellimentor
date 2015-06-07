@@ -5,10 +5,10 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="7701"/>
     </dependencies>
     <scenes>
-        <!--Interface Controller-->
+        <!--mainInterface-->
         <scene sceneID="aou-V4-d1y">
             <objects>
-                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="IMFull_WatchKit_App" customModuleProvider="target">
+                <controller identifier="mainInterface" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="IMFull_WatchKit_App" customModuleProvider="target">
                     <items>
                         <button width="1" alignment="left" title="Button" id="ML4-Ir-zYr">
                             <connections>
@@ -40,6 +40,37 @@
                 </controller>
             </objects>
             <point key="canvasLocation" x="220" y="345"/>
+        </scene>
+        <!--Static Notification Interface Controller-->
+        <scene sceneID="2hu-wK-5HY">
+            <objects>
+                <notificationController id="AHC-aN-hO9">
+                    <items>
+                        <label alignment="left" text="Alert Label" textAlignment="left" numberOfLines="0" id="Ydr-Ka-9iB"/>
+                    </items>
+                    <notificationCategory key="notificationCategory" identifier="qDue" id="tJ0-hO-D4U"/>
+                    <connections>
+                        <outlet property="notificationAlertLabel" destination="Ydr-Ka-9iB" id="yMh-Av-t9P"/>
+                        <segue destination="AkG-8S-NvW" kind="relationship" relationship="dynamicNotificationInterface" id="2xh-ds-HD1"/>
+                    </connections>
+                </notificationController>
+            </objects>
+            <point key="canvasLocation" x="218" y="594"/>
+        </scene>
+        <!--Question Due Notification Controller-->
+        <scene sceneID="i94-fe-hl1">
+            <objects>
+                <controller id="AkG-8S-NvW" customClass="QuestionDueNotificationController" customModule="IMFull_WatchKit_Extension">
+                    <items>
+                        <timer alignment="left" id="nPu-dh-9ye"/>
+                        <label alignment="left" text="Question" numberOfLines="0" id="V1I-8o-Ibp"/>
+                    </items>
+                    <connections>
+                        <outlet property="questionLabel" destination="V1I-8o-Ibp" id="r3i-W9-4HQ"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="518" y="594"/>
         </scene>
     </scenes>
 </document>

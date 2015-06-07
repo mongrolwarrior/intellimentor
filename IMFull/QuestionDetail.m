@@ -72,7 +72,7 @@
         intVal = intVal + 1;
         [prefs setInteger:intVal forKey:@"idCount"];
         [prefs synchronize];
-        NSNumber *qidNumber = [NSNumber numberWithInt: intVal];
+        NSNumber *qidNumber = [NSNumber numberWithLong: intVal];
         [self.currentQuestion setQid:qidNumber];
         [self.currentQuestion setCurrent:[NSNumber numberWithInt:0]];
     }

@@ -11,7 +11,7 @@
 	NSFetchRequest *request = [[NSFetchRequest alloc] init];
 	NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:managedObjectContext];
 	[request setEntity:entity];	
-    [request setFetchLimit:5];
+    [request setFetchLimit:15];
     
 	// If a predicate was specified then use it in the request
 	if (predicate != nil)

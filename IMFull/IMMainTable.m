@@ -22,7 +22,7 @@ NSTimer *timer;
   //  Use these to reset date and counter for automatic new question
   //  [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
   //  [prefs setInteger:1 forKey:@"countNewQuestions"];
-    self.navigationItem.title = [NSString stringWithFormat:@"%d-%d", [prefs integerForKey:@"countNewQuestions"], [prefs integerForKey:@"timeLag"]];
+    self.navigationItem.title = [NSString stringWithFormat:@"%ld-%ld", (long)[prefs integerForKey:@"countNewQuestions"], (long)[prefs integerForKey:@"timeLag"]];
     //  Repopulate the array with new table data
     [self readDataForTable];
     // Repeat populate every second
@@ -30,13 +30,7 @@ NSTimer *timer;
     timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(readDataForTable) userInfo:nil repeats:YES];
     // replaced by NSTIME repeating function above - "[self readDataForTable];"
     
-    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
-    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
-    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
-    
-    Questions *thisQuestion = questionListData[0];
-    NSLog(@"%@, %@, %@", thisQuestion.question, thisQuestion.answer, thisQuestion.qid.stringValue);
-    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", thisQuestion.question, thisQuestion.qPictureName, thisQuestion.answer, thisQuestion.aPictureName, thisQuestion.qid.stringValue] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [self processJsonFile];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -79,7 +73,7 @@ NSTimer *timer;
 //  Return the number of rows in the section (the amount of items in our array)
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (tableView == self.searchDisplayController.searchResultsTableView) {
+    if (tableView == self.	searchDisplayController.searchResultsTableView) {
         return [filteredSearchArray count];
     } else {
         return [questionListData count];
@@ -188,19 +182,91 @@ NSTimer *timer;
     }   
 }
 
+
+-(void)processJsonFile
+{
+    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
+    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
+    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == YES"];
+    NSMutableArray *questionListData = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"nextdue" andSortAscending:YES andContext:self.managedObjectContext];
+    
+    Questions *newQuestion;
+    
+    for (int i=0; i<15; i++) {
+        Questions *loopQuestion = questionListData[i];
+        
+        NSComparisonResult result = [[NSDate date] compare:loopQuestion.nextdue]; // comparing two dates; will be NSOrderedAscending if nextdue is later than now
+        
+        if(!(result==NSOrderedAscending && [[NSDateFormatter localizedStringFromDate:loopQuestion.lastanswered dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]]))
+            // if not (next due in future, and last answered is today's date) can ask question in apple watch
+        {
+            newQuestion = loopQuestion;
+            NSLog(@"%@", newQuestion.question);
+            break;
+        }
+    }
+    
+    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", [newQuestion.question stringByReplacingOccurrencesOfString:@"\n" withString:@"<br/>"], newQuestion.qPictureName, [newQuestion.answer stringByReplacingOccurrencesOfString:@"\n" withString:@"<br/>"], newQuestion.aPictureName, newQuestion.qid] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (!ok)
+        NSLog(@"Failed to write question.json file in IMAppDelegate.m - handleWatchKitExtensionRequest");
+    if (newQuestion.qPictureName.length > 0) {
+        NSString *questionPicturePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[@"/" stringByAppendingString:newQuestion.qPictureName]];
+        NSURL *questionPictureURL = [NSURL fileURLWithPath:questionPicturePath];
+        
+        BOOL questionPictureExists = [questionPictureURL checkResourceIsReachableAndReturnError:nil];
+        
+        if (questionPictureExists){
+            NSError *error;
+            NSURL *fileInSharedContainerURL = [sharedContainerURL URLByAppendingPathComponent:newQuestion.qPictureName];
+            BOOL success = [[NSFileManager defaultManager] copyItemAtURL:questionPictureURL toURL:fileInSharedContainerURL error:&error];
+            NSLog(@"storeURL: %@", questionPicturePath);
+            NSLog(@"sharedContainerURL: %@", sharedContainerURL);
+            if (success == YES)
+            {
+                NSLog(@"Copied");
+            }
+            else
+            {
+                NSLog(@"Not Copied %@", error);
+            }
+        }
+    }
+    
+    if (newQuestion.aPictureName.length > 0)
+    {
+        NSString *answerPicturePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[@"/" stringByAppendingString:newQuestion.aPictureName]];
+        NSURL *answerPictureURL = [NSURL fileURLWithPath:answerPicturePath];
+        
+        BOOL answerPictureExists = [answerPictureURL checkResourceIsReachableAndReturnError:nil];
+        
+        if (answerPictureExists){
+            NSError *error;
+            NSURL *fileInSharedContainerURL = [sharedContainerURL URLByAppendingPathComponent:newQuestion.aPictureName];
+            BOOL success = [[NSFileManager defaultManager] copyItemAtURL:answerPictureURL toURL:fileInSharedContainerURL error:&error];
+            NSLog(@"storeURL: %@", answerPicturePath);
+            NSLog(@"sharedContainerURL: %@", sharedContainerURL);
+            if (success == YES)
+            {
+                NSLog(@"Copied");
+            }
+            else
+            {
+                NSLog(@"Not Copied %@", error);
+            }
+        }
+    }
+    
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     /*NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:groupID];
      containerURL = [containerURL URLByAppendingPathComponent:[NSString stringWithFormat:@"Library/Caches/test.txt"]];
 */
     
-    NSString *kAppGroupIdentifier = @"group.com.slylie.intellimentor.documents";
-    NSURL *sharedContainerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroupIdentifier];
-    NSURL *docURL = [sharedContainerURL URLByAppendingPathComponent:@"question.json"];
-    
-    Questions *thisQuestion = questionListData[0];
-    NSLog(@"%@, %@, %@", thisQuestion.question, thisQuestion.answer, thisQuestion.qid.stringValue);
-    BOOL ok = [[NSString stringWithFormat:@"{\"Question\": \"%@\", \"qImage\": \"%@\", \"Answer\": \"%@\", \"aImage\": \"%@\", \"qid\": \"%@\"}", thisQuestion.question, thisQuestion.qPictureName, thisQuestion.answer, thisQuestion.aPictureName, thisQuestion.qid.stringValue] writeToURL:docURL atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [self processJsonFile];
     
     if (tableView == self.searchDisplayController.searchResultsTableView) {
         [self performSegueWithIdentifier: @"TextQuestion" sender: self];
