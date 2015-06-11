@@ -88,7 +88,7 @@ class InterfaceController: WKInterfaceController {
             let answerString = json!["Answer"].stringValue
             questionLabel.setText(answerString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
             
-            if (!json!["aImage"].stringValue.isEmpty) {
+            if (!(json!["aImage"].stringValue.isEmpty || json!["aImage"].stringValue == "(null)")) {
                 //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
                 let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["aImage"].stringValue)
                 
@@ -106,7 +106,7 @@ class InterfaceController: WKInterfaceController {
             let questionString = json!["Question"].stringValue
             questionLabel.setText(questionString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
             
-            if (!json!["qImage"].stringValue.isEmpty) {
+            if (!(json!["qImage"].stringValue.isEmpty  || json!["qImage"].stringValue == "(null)")) {
                 //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
                 let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["qImage"].stringValue)
                 
@@ -133,20 +133,21 @@ class InterfaceController: WKInterfaceController {
     }
     
     @IBAction func incorrectAnswer() {
-        let requestInfo: [NSObject: AnyObject] = [NSString(string: "qid"): NSString(string: qid!), NSString(string: "accuracy"): NSString(string: "false")]
+        let requestInfo: [NSObject: AnyObject] = [
+            "qid": qid!,
+            "accuracy": "false"
+        ]
         WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
             self.refreshControls()
         }
     }
     
     override func handleActionWithIdentifier(identifier: String?, forLocalNotification localNotification: UILocalNotification) {
-        if let userInfo = localNotification.userInfo {
-            processActionWithIdentifier(identifier, withUserInfo: userInfo)
-        }
+        pushControllerWithName("mainInterface", context: nil)
     }
     
     override func handleActionWithIdentifier(identifier: String?, forRemoteNotification remoteNotification: [NSObject : AnyObject]) {
-        processActionWithIdentifier(identifier, withUserInfo: remoteNotification)
+        pushControllerWithName("mainInterface", context: nil)
     }
     
     func processActionWithIdentifier(identifier: String?, withUserInfo userInfo: [NSObject: AnyObject]) {

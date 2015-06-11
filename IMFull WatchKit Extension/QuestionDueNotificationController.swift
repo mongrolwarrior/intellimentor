@@ -14,8 +14,11 @@ class QuestionDueNotificationController: WKUserNotificationInterfaceController {
     @IBOutlet weak var questionLabel: WKInterfaceLabel!
     
     override func didReceiveLocalNotification(localNotification: UILocalNotification, withCompletion completionHandler: (WKUserNotificationInterfaceType) -> Void) {
-        if let userInfo = localNotification.userInfo {
-            processNotificationWithUserInfo(userInfo, withCompletion: completionHandler)
+        if localNotification.category == "qDue"
+        {
+            if let userInfo = localNotification.userInfo {
+                processNotificationWithUserInfo(userInfo, withCompletion: completionHandler)
+            }
         }
     }
     

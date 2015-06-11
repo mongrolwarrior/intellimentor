@@ -40,6 +40,63 @@
         soundButton.hidden = true;
 }
 
+- (void)setLocalNotificationForAppleWatch:(int)dateLatency
+{
+    NSMutableSet *categories = [[NSMutableSet alloc] init];
+    UIMutableUserNotificationAction *viewQuestion = [[UIMutableUserNotificationAction alloc] init];
+    viewQuestion.title = @"View Question";
+    viewQuestion.identifier = @"viewQuestion";
+    viewQuestion.activationMode = UIUserNotificationActivationModeForeground;
+    viewQuestion.authenticationRequired = false;
+    
+    UIMutableUserNotificationCategory *questionCategory = [[UIMutableUserNotificationCategory alloc] init];
+    questionCategory.identifier = @"qDue";
+    [questionCategory setActions:@[viewQuestion] forContext:UIUserNotificationActionContextDefault];
+    
+    [categories addObject:questionCategory];
+    
+    UIUserNotificationType notificationType = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+    UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationType categories:categories];
+    
+    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    
+    UILocalNotification* localNotification = [[UILocalNotification alloc] init];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+//    localAWNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:dateLatency];
+    localNotification.timeZone = [NSTimeZone defaultTimeZone];
+}
+
+- (NSDictionary *)createAPNS:(NSString *)qid
+{
+    // Alert dictionary
+    NSDictionary *alertDict = @{@"body":@"06/06 13:35", @"title": @"Question due"};
+    
+    // aps dictionary
+    NSDictionary *apsDict = @{@"alert":alertDict, @"category":@"qDue"};
+    
+    // Dictionary with several kay/value pairs and the above array of arrays
+    NSDictionary *dict = @{@"aps" : apsDict, @"message": @"06/06 13:35", @"question": @"Where do babies come from?"};
+    
+    NSError *error = nil;
+    NSData *json;
+    
+    // Dictionary convertable to JSON ?
+    if ([NSJSONSerialization isValidJSONObject:dict])
+    {
+        // Serialize the dictionary
+        json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&error];
+        
+        // If no errors, let's view the JSON
+        if (json != nil && error == nil)
+        {
+            NSString *jsonString = [[[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding] stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"];
+            
+            NSLog(@"JSON: %@", jsonString);
+        }
+    }
+    return dict;
+}
+
 //  Answer is true
 - (IBAction)answerIsTrue:(id)sender
 {
@@ -156,7 +213,8 @@
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];	
     
     
@@ -169,6 +227,10 @@
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     
 	localNotification.alertLaunchImage = nil;
+    
+    localNotification.category = @"qDue";
+    localNotification.userInfo = [self createAPNS:@"999"];
+    [self setLocalNotificationForAppleWatch:dateLatency];
     
 	// Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
@@ -321,7 +383,8 @@
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];
     
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
@@ -332,6 +395,10 @@
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     
 	localNotification.alertLaunchImage = nil;
+    
+    localNotification.category = @"qDue";
+    localNotification.userInfo = [self createAPNS:@"999"];
+    [self setLocalNotificationForAppleWatch:dateLatency];
     
 	// Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];

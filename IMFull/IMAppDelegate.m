@@ -20,6 +20,58 @@
 @synthesize managedObjectModel = __managedObjectModel;
 @synthesize persistentStoreCoordinator = __persistentStoreCoordinator;
 
+/*
+ {
+ "aps": {
+ "alert": {
+ "body": "06/06 13:35",
+ "title": "Question due"
+ },
+ "category": "qDue"
+ },
+ 
+ "WatchKit Simulator Actions": [
+ {
+ "title": "View Question",
+ "identifier": "viewQuestionButtonAction"
+ }
+ ],
+ "message": "06/06 13:35",
+ "question": "Where do babies come from?"
+ }
+*/
+
+- (NSDictionary *)createAPNS:(NSString *)qid
+{
+    // Alert dictionary
+    NSDictionary *alertDict = @{@"body":@"06/06 13:35", @"title": @"Question due"};
+    
+    // aps dictionary
+    NSDictionary *apsDict = @{@"alert":alertDict, @"category":@"qDue"};
+    
+    // Dictionary with several kay/value pairs and the above array of arrays
+    NSDictionary *dict = @{@"aps" : apsDict, @"message": @"06/06 13:35", @"question": @"Where do babies come from?"};
+    
+    NSError *error = nil;
+    NSData *json;
+    
+    // Dictionary convertable to JSON ?
+    if ([NSJSONSerialization isValidJSONObject:dict])
+    {
+        // Serialize the dictionary
+        json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&error];
+        
+        // If no errors, let's view the JSON
+        if (json != nil && error == nil)
+        {
+            NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+            
+            NSLog(@"JSON: %@", jsonString);
+        }
+    }
+    return dict;
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Pass the managed object context to the root view controller (the login view)
@@ -335,6 +387,34 @@
     [[UIApplication sharedApplication] endBackgroundTask:realBackgroundTask];
 }
 
+- (void)setLocalNotificationForAppleWatch:(int)dateLatency
+{
+    NSMutableSet *categories = [[NSMutableSet alloc] init];
+    UIMutableUserNotificationAction *viewQuestion = [[UIMutableUserNotificationAction alloc] init];
+    viewQuestion.title = @"View Question";
+    viewQuestion.identifier = @"viewQuestion";
+    viewQuestion.activationMode = UIUserNotificationActivationModeForeground;
+    viewQuestion.authenticationRequired = false;
+    
+    UIMutableUserNotificationCategory *questionCategory = [[UIMutableUserNotificationCategory alloc] init];
+    [questionCategory setActions:@[viewQuestion] forContext:UIUserNotificationActionContextDefault];
+    questionCategory.identifier = @"qDue";
+    
+    [categories addObject:questionCategory];
+    
+    UIUserNotificationType notificationType = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+    UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationType categories:categories];
+    
+    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    
+    UILocalNotification* localNotification = [[UILocalNotification alloc] init];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:dateLatency];
+    
+    localNotification.category = @"qDue";
+    localNotification.userInfo = [self createAPNS:@"999"];
+    
+    [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+}
 
 //  Answer is true
 - (void)answerIsTrue:(Questions *)currentQuestion
@@ -447,7 +527,8 @@
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];
     
     
@@ -462,7 +543,8 @@
     localNotification.alertLaunchImage = nil;
     
     localNotification.category = @"qDue";
-    localNotification.userInfo = [NSDictionary dictionaryWithObjectsAndKeys: @"question", @"Where don't babies come from?", nil];
+    localNotification.userInfo = [self createAPNS:@"999"];
+    [self setLocalNotificationForAppleWatch:dateLatency];
     
     // Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
@@ -600,7 +682,8 @@ func scheduleTimerNotificationWithUserInfo(userInfo: [NSObject : AnyObject]!) {
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];
     
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
@@ -613,6 +696,8 @@ func scheduleTimerNotificationWithUserInfo(userInfo: [NSObject : AnyObject]!) {
     localNotification.alertLaunchImage = nil;
     
     localNotification.category = @"qDue";
+    localNotification.userInfo = [self createAPNS:@"999"];
+    [self setLocalNotificationForAppleWatch:dateLatency];
     
     // Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];

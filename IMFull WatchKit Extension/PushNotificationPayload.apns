@@ -9,8 +9,8 @@
     
     "WatchKit Simulator Actions": [
         {
-            "title": "View Question",
-            "identifier": "viewQuestionButtonAction"
+            "title": "View QuestionSim",
+            "identifier": "viewQuestion"
         }
     ],
     "message": "06/06 13:35",
