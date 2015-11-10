@@ -61,8 +61,8 @@
     [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     
     UILocalNotification* localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
-//    localAWNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:dateLatency];
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];
 }
 
@@ -76,24 +76,24 @@
     
     // Dictionary with several kay/value pairs and the above array of arrays
     NSDictionary *dict = @{@"aps" : apsDict, @"message": @"06/06 13:35", @"question": @"Where do babies come from?"};
-    
-    NSError *error = nil;
-    NSData *json;
-    
-    // Dictionary convertable to JSON ?
-    if ([NSJSONSerialization isValidJSONObject:dict])
-    {
-        // Serialize the dictionary
-        json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&error];
-        
-        // If no errors, let's view the JSON
-        if (json != nil && error == nil)
-        {
-            NSString *jsonString = [[[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding] stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"];
-            
-            NSLog(@"JSON: %@", jsonString);
-        }
-    }
+    /*
+     NSError *error = nil;
+     NSData *json;
+     
+     // Dictionary convertable to JSON ?
+     if ([NSJSONSerialization isValidJSONObject:dict])
+     {
+     // Serialize the dictionary
+     json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&error];
+     
+     // If no errors, let's view the JSON
+     if (json != nil && error == nil)
+     {
+     NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+     
+     NSLog(@"JSON: %@", jsonString);
+     }
+     }*/
     return dict;
 }
 
@@ -167,11 +167,44 @@
                 if ([[NSDateFormatter localizedStringFromDate:[prefs objectForKey:@"lastNewQuestion"] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]])
                     // eg if the date of the last new question initiated is equal to today's date
                 {
+                    if ([prefs integerForKey:@"timeLag"]>10)
+                    {
+                        // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
+                        NSPersistentStoreCoordinator *psc = [managedObjectContext persistentStoreCoordinator];
+                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+                        [newContext setPersistentStoreCoordinator:psc];
+                        
+                        //         NSMutableArray *nCQuestions = [[NSMutableArray alloc] init];
+                        
+                        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"current == NO"];
+                        NSMutableArray *nCQuestions = [CoreDataHelper searchObjectsForEntity:@"Questions" withPredicate:predicate andSortKey:@"qid" andSortAscending:NO andContext:managedObjectContext];
+                        
+                        Questions *activateQuestion = [nCQuestions objectAtIndex:0];
+                        
+                        activateQuestion.current = [NSNumber numberWithBool:true];
+                        activateQuestion.lastanswered = [NSDate dateWithTimeIntervalSinceNow:((660+60*intVal)-300)];
+                        activateQuestion.nextdue = [NSDate dateWithTimeIntervalSinceNow:(660+60*intVal)];
+                        
+                        // Add 1 to count of new questions initiated today
+                        [prefs setInteger:[prefs integerForKey:@"countNewQuestions"]+1 forKey:@"countNewQuestions"];
+                    }
+                }
+                else
+                {
+                    // restart count as must be a new day
+                    [prefs setInteger:1 forKey:@"countNewQuestions"];
+                    [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
+                }
+                
+                /* OLD METHOD FOR TRIGGERING NEW QUESTION - NEW QUESTION FOR EACH 10 QUESTION COUNTS PER DAY
+                if ([[NSDateFormatter localizedStringFromDate:[prefs objectForKey:@"lastNewQuestion"] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle] isEqualToString:[NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle]])
+                    // eg if the date of the last new question initiated is equal to today's date
+                {
                     if ([prefs integerForKey:@"timeLag"]/[prefs integerForKey:@"countNewQuestions"]>=10)
                     {
                         // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
                         NSPersistentStoreCoordinator *psc = [managedObjectContext persistentStoreCoordinator];
-                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] init];
+                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
                         [newContext setPersistentStoreCoordinator:psc];
                         
                //         NSMutableArray *nCQuestions = [[NSMutableArray alloc] init];
@@ -194,7 +227,7 @@
                     // restart count as must be a new day
                     [prefs setInteger:1 forKey:@"countNewQuestions"];
                     [prefs setObject:[NSDate date] forKey:@"lastNewQuestion"];
-                }
+                } */
             }
             else
             {
@@ -210,19 +243,23 @@
         }
     }
     
+ /*   if (dateLatency > 900) {
+        dateLatency = 900;
+    }
+   */ 
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
-//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
-    localNotification.timeZone = [NSTimeZone defaultTimeZone];	
+//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.timeZone = [NSTimeZone defaultTimeZone];
     
     
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSInteger intVal = [prefs integerForKey:@"timeLag"];
     
     localNotification.alertBody = [NSString stringWithFormat:@"%ld-%d", (long)intVal, (int)dateLatency];
-    localNotification.alertAction = [NSString stringWithFormat:@"View"];	
+    localNotification.alertAction = [NSString stringWithFormat:@"View"];
     
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     
@@ -308,7 +345,7 @@
                         
                         // Automatic initiation of new questions at timeLag = 10, 20, 30, etc, resetting each day
                         NSPersistentStoreCoordinator *psc = [managedObjectContext persistentStoreCoordinator];
-                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] init];
+                        NSManagedObjectContext *newContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
                         [newContext setPersistentStoreCoordinator:psc];
                         
               //          NSMutableArray *nCQuestions = [[NSMutableArray alloc] init];
@@ -374,17 +411,22 @@
         }
     }
     
+/*    if (dateLatency > 1200) {
+        dateLatency = 1200;
+    }
+  */
     if (![self.managedObjectContext save:&error])
         NSLog(@"Failed to save nextdue with error: %@", [error domain]);
     
     NSString *dateString = [NSDateFormatter localizedStringFromDate:currentQuestion.nextdue dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterFullStyle];
     [answerField setText:dateString];
     
+    // Cancel previous notifications
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     
+    // Set up iPhone notification
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
-//    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
+    localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(int)dateLatency];
     localNotification.timeZone = [NSTimeZone defaultTimeZone];
     
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
@@ -399,6 +441,7 @@
     localNotification.category = @"qDue";
     localNotification.userInfo = [self createAPNS:@"999"];
     [self setLocalNotificationForAppleWatch:dateLatency];
+    
     
 	// Schedule it with the app
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];

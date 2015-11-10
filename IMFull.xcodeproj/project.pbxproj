@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		351931C51B2D097F00E88002 /* Whip.wav in Resources */ = {isa = PBXBuildFile; fileRef = 351931C41B2D097F00E88002 /* Whip.wav */; };
+		351931C71B2D221700E88002 /* Growl.wav in Resources */ = {isa = PBXBuildFile; fileRef = 351931C61B2D221700E88002 /* Growl.wav */; };
 		351A682E15CBFC7C0032B25D /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A682D15CBFC7C0032B25D /* LoginViewController.m */; };
 		351A683215CC02DD0032B25D /* IMMainTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A683115CC02DD0032B25D /* IMMainTable.m */; };
 		351A683915CC0A2A0032B25D /* QuestionDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A683815CC0A2A0032B25D /* QuestionDetail.m */; };
@@ -15,10 +17,8 @@
 		351A685015CFD0900032B25D /* TextAnswer.m in Sources */ = {isa = PBXBuildFile; fileRef = 351A684F15CFD0900032B25D /* TextAnswer.m */; };
 		352AD8A91B1DC6740049E31B /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AD8A81B1DC6740049E31B /* InterfaceController.swift */; };
 		352AD8AD1B1DC6740049E31B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8AC1B1DC6740049E31B /* Images.xcassets */; };
-		352AD8B11B1DC6740049E31B /* IMFull WatchKit App.app in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8B01B1DC6740049E31B /* IMFull WatchKit App.app */; };
 		352AD8B91B1DC6740049E31B /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8B71B1DC6740049E31B /* Interface.storyboard */; };
 		352AD8BB1B1DC6740049E31B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 352AD8BA1B1DC6740049E31B /* Images.xcassets */; };
-		352AD8BE1B1DC6740049E31B /* IMFull WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 352AD8A31B1DC6740049E31B /* IMFull WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		352AD8CB1B1DDD6A0049E31B /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AD8CA1B1DDD6A0049E31B /* SwiftyJSON.swift */; };
 		352AD8CC1B1DDD6A0049E31B /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AD8CA1B1DDD6A0049E31B /* SwiftyJSON.swift */; };
 		352F488215CBF53B00E3B5E1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 352F488115CBF53B00E3B5E1 /* UIKit.framework */; };
@@ -36,43 +36,57 @@
 		3563FF9515D680D7004C31D3 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 3563FF9415D680D7004C31D3 /* Users.m */; };
 		3563FF9815D680D7004C31D3 /* AnswerLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 3563FF9715D680D7004C31D3 /* AnswerLog.m */; };
 		3563FF9B15D680D7004C31D3 /* Questions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3563FF9A15D680D7004C31D3 /* Questions.m */; };
-		3563FFA115D68279004C31D3 /* NewQuestions.json in Resources */ = {isa = PBXBuildFile; fileRef = 3563FFA015D68279004C31D3 /* NewQuestions.json */; };
 		35675ACC1B22F05A0091E456 /* QuestionDueNotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35675ACB1B22F05A0091E456 /* QuestionDueNotificationController.swift */; };
 		3575EA0E186864DD00F269C2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3575EA0D186864DD00F269C2 /* Default-568h@2x.png */; };
+		35ECE63A1BEB69A200D47EEF /* IMFull WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 352AD8A31B1DC6740049E31B /* IMFull WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		35ECE63D1BEB69A200D47EEF /* IMFull WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 352AD8B01B1DC6740049E31B /* IMFull WatchKit App.app */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		352AD8B21B1DC6740049E31B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 352F487415CBF53B00E3B5E1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 352AD8AF1B1DC6740049E31B;
-			remoteInfo = "IMFull WatchKit App";
-		};
-		352AD8BC1B1DC6740049E31B /* PBXContainerItemProxy */ = {
+		35ECE6381BEB69A200D47EEF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 352F487415CBF53B00E3B5E1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 352AD8A21B1DC6740049E31B;
 			remoteInfo = "IMFull WatchKit Extension";
 		};
+		35ECE63B1BEB69A200D47EEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 352F487415CBF53B00E3B5E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 352AD8AF1B1DC6740049E31B;
+			remoteInfo = "IMFull WatchKit App";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		352AD8C51B1DC6740049E31B /* Embed App Extensions */ = {
+		35ECE63E1BEB69A200D47EEF /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				352AD8BE1B1DC6740049E31B /* IMFull WatchKit Extension.appex in Embed App Extensions */,
+				35ECE63A1BEB69A200D47EEF /* IMFull WatchKit Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		35ECE63F1BEB69A200D47EEF /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				35ECE63D1BEB69A200D47EEF /* IMFull WatchKit App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		351931C41B2D097F00E88002 /* Whip.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Whip.wav; sourceTree = "<group>"; };
+		351931C61B2D221700E88002 /* Growl.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Growl.wav; sourceTree = "<group>"; };
 		351A682C15CBFC7C0032B25D /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		351A682D15CBFC7C0032B25D /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		351A683015CC02DD0032B25D /* IMMainTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMMainTable.h; sourceTree = "<group>"; };
@@ -124,7 +138,6 @@
 		3563FF9715D680D7004C31D3 /* AnswerLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AnswerLog.m; path = IMFull/AnswerLog.m; sourceTree = "<group>"; };
 		3563FF9915D680D7004C31D3 /* Questions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Questions.h; path = IMFull/Questions.h; sourceTree = "<group>"; };
 		3563FF9A15D680D7004C31D3 /* Questions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Questions.m; path = IMFull/Questions.m; sourceTree = "<group>"; };
-		3563FFA015D68279004C31D3 /* NewQuestions.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = NewQuestions.json; sourceTree = "<group>"; };
 		35675ACA1B22E13B0091E456 /* IMFullNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = IMFullNotificationPayload.apns; sourceTree = "<group>"; };
 		35675ACB1B22F05A0091E456 /* QuestionDueNotificationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuestionDueNotificationController.swift; sourceTree = "<group>"; };
 		3575EA0D186864DD00F269C2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -259,6 +272,8 @@
 		352F488A15CBF53B00E3B5E1 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				351931C41B2D097F00E88002 /* Whip.wav */,
+				351931C61B2D221700E88002 /* Growl.wav */,
 				352F488B15CBF53B00E3B5E1 /* IMFull-Info.plist */,
 				352F488C15CBF53B00E3B5E1 /* InfoPlist.strings */,
 				352F488F15CBF53B00E3B5E1 /* main.m */,
@@ -281,7 +296,6 @@
 				3563FF9415D680D7004C31D3 /* Users.m */,
 				352F48C115CBFA7500E3B5E1 /* CoreDataHelper.h */,
 				352F48C215CBFA7500E3B5E1 /* CoreDataHelper.m */,
-				3563FFA015D68279004C31D3 /* NewQuestions.json */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";
@@ -300,27 +314,28 @@
 			buildRules = (
 			);
 			dependencies = (
-				352AD8B31B1DC6740049E31B /* PBXTargetDependency */,
 			);
 			name = "IMFull WatchKit Extension";
 			productName = "IMFull WatchKit Extension";
 			productReference = 352AD8A31B1DC6740049E31B /* IMFull WatchKit Extension.appex */;
-			productType = "com.apple.product-type.watchkit-extension";
+			productType = "com.apple.product-type.watchkit2-extension";
 		};
 		352AD8AF1B1DC6740049E31B /* IMFull WatchKit App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 352AD8C31B1DC6740049E31B /* Build configuration list for PBXNativeTarget "IMFull WatchKit App" */;
 			buildPhases = (
 				352AD8AE1B1DC6740049E31B /* Resources */,
+				35ECE63E1BEB69A200D47EEF /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				35ECE6391BEB69A200D47EEF /* PBXTargetDependency */,
 			);
 			name = "IMFull WatchKit App";
 			productName = "IMFull WatchKit App";
 			productReference = 352AD8B01B1DC6740049E31B /* IMFull WatchKit App.app */;
-			productType = "com.apple.product-type.application.watchapp";
+			productType = "com.apple.product-type.application.watchapp2";
 		};
 		352F487C15CBF53B00E3B5E1 /* IMFull */ = {
 			isa = PBXNativeTarget;
@@ -329,12 +344,12 @@
 				352F487915CBF53B00E3B5E1 /* Sources */,
 				352F487A15CBF53B00E3B5E1 /* Frameworks */,
 				352F487B15CBF53B00E3B5E1 /* Resources */,
-				352AD8C51B1DC6740049E31B /* Embed App Extensions */,
+				35ECE63F1BEB69A200D47EEF /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				352AD8BD1B1DC6740049E31B /* PBXTargetDependency */,
+				35ECE63C1BEB69A200D47EEF /* PBXTargetDependency */,
 			);
 			name = IMFull;
 			productName = IMFull;
@@ -348,7 +363,9 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = IM;
-				LastUpgradeCheck = 0630;
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "University of Queensland";
 				TargetAttributes = {
 					352AD8A21B1DC6740049E31B = {
@@ -400,7 +417,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				352AD8AD1B1DC6740049E31B /* Images.xcassets in Resources */,
-				352AD8B11B1DC6740049E31B /* IMFull WatchKit App.app in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,7 +436,8 @@
 				352F488E15CBF53B00E3B5E1 /* InfoPlist.strings in Resources */,
 				3575EA0E186864DD00F269C2 /* Default-568h@2x.png in Resources */,
 				352F48C515CBFAD000E3B5E1 /* IMStoryBoard.storyboard in Resources */,
-				3563FFA115D68279004C31D3 /* NewQuestions.json in Resources */,
+				351931C51B2D097F00E88002 /* Whip.wav in Resources */,
+				351931C71B2D221700E88002 /* Growl.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -462,15 +479,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		352AD8B31B1DC6740049E31B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 352AD8AF1B1DC6740049E31B /* IMFull WatchKit App */;
-			targetProxy = 352AD8B21B1DC6740049E31B /* PBXContainerItemProxy */;
-		};
-		352AD8BD1B1DC6740049E31B /* PBXTargetDependency */ = {
+		35ECE6391BEB69A200D47EEF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 352AD8A21B1DC6740049E31B /* IMFull WatchKit Extension */;
-			targetProxy = 352AD8BC1B1DC6740049E31B /* PBXContainerItemProxy */;
+			targetProxy = 35ECE6381BEB69A200D47EEF /* PBXContainerItemProxy */;
+		};
+		35ECE63C1BEB69A200D47EEF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 352AD8AF1B1DC6740049E31B /* IMFull WatchKit App */;
+			targetProxy = 35ECE63B1BEB69A200D47EEF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -505,6 +522,7 @@
 				CODE_SIGN_ENTITLEMENTS = "IMFull WatchKit Extension/IMFull WatchKit Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -517,10 +535,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = INTELLIMENTOR.IMFull.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos2.0;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
 		};
@@ -535,6 +557,7 @@
 				CODE_SIGN_ENTITLEMENTS = "IMFull WatchKit Extension/IMFull WatchKit Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -545,9 +568,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = INTELLIMENTOR.IMFull.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos2.0;
 				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
 		};
@@ -562,6 +589,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -571,15 +599,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				IBSC_MODULE = IMFull_WatchKit_Extension;
 				INFOPLIST_FILE = "IMFull WatchKit App/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = INTELLIMENTOR.IMFull.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "IMFull WatchKit Extension/IMFull WatchKit App-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 4;
-				"TARGETED_DEVICE_FAMILY[sdk=iphonesimulator*]" = "1,4";
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
 		};
@@ -595,20 +624,22 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				IBSC_MODULE = IMFull_WatchKit_Extension;
 				INFOPLIST_FILE = "IMFull WatchKit App/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = INTELLIMENTOR.IMFull.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "IMFull WatchKit Extension/IMFull WatchKit App-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 4;
-				"TARGETED_DEVICE_FAMILY[sdk=iphonesimulator*]" = "1,4";
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
 		};
@@ -627,6 +658,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -643,7 +675,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -673,7 +705,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -691,12 +723,14 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IMFull/IMFull-Prefix.pch";
 				INFOPLIST_FILE = "IMFull/IMFull-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "INTELLIMENTOR.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "IMFull WatchKit Extension/IMFull-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -712,11 +746,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IMFull/IMFull-Prefix.pch";
 				INFOPLIST_FILE = "IMFull/IMFull-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "INTELLIMENTOR.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "IMFull WatchKit Extension/IMFull-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

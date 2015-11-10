@@ -1,7 +1,7 @@
 {
     "aps": {
         "alert": {
-            "body": "06/06 13:35",
+            "body": "body 06/06 13:35",
             "title": "Question due"
         },
         "category": "qDue"
@@ -13,6 +13,6 @@
             "identifier": "viewQuestion"
         }
     ],
-    "message": "06/06 13:35",
-    "question": "Where do babies come from?"
+    "message": "messag 06/06 13:35",
+    "title": "Where do babies come from"
 }

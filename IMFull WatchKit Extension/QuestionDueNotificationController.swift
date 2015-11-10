@@ -10,30 +10,34 @@ import Foundation
 import WatchKit
 
 class QuestionDueNotificationController: WKUserNotificationInterfaceController {
- 
-    @IBOutlet weak var questionLabel: WKInterfaceLabel!
+    @IBOutlet weak var titleLabel: WKInterfaceLabel!
+    @IBOutlet weak var messageLabel: WKInterfaceLabel!
     
     override func didReceiveLocalNotification(localNotification: UILocalNotification, withCompletion completionHandler: (WKUserNotificationInterfaceType) -> Void) {
-        if localNotification.category == "qDue"
-        {
-            if let userInfo = localNotification.userInfo {
-                processNotificationWithUserInfo(userInfo, withCompletion: completionHandler)
-            }
+        if let userInfo = localNotification.userInfo {
+            processNotificationWithUserInfo(userInfo, withCompletion: completionHandler)
         }
     }
     
     override func didReceiveRemoteNotification(remoteNotification: [NSObject : AnyObject], withCompletion completionHandler: (WKUserNotificationInterfaceType) -> Void) {
-        processNotificationWithUserInfo(remoteNotification, withCompletion: completionHandler)
+       processNotificationWithUserInfo(remoteNotification, withCompletion: completionHandler)
+        
     }
     
     func processNotificationWithUserInfo(userInfo: [NSObject : AnyObject], withCompletion completionHandler:(WKUserNotificationInterfaceType)->Void) {
         
-        questionLabel.setHidden(true)
-        if let title = userInfo["question"] as? String {
-            questionLabel.setHidden(false)
-            questionLabel.setText(title)
+        messageLabel.setHidden(true)
+        if let message = userInfo["message"] as? String {
+            messageLabel.setHidden(false)
+            messageLabel.setText(message)
+        }
+        
+        titleLabel.setHidden(true)
+        if let title = userInfo["title"] as? String {
+            titleLabel.setHidden(false)
+            titleLabel.setText(title)
         }
         
         completionHandler(.Custom)
-    }    
+    }
 }

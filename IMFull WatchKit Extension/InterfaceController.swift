@@ -8,10 +8,13 @@
 
 import WatchKit
 import Foundation
+import WatchConnectivity
 
 
-class InterfaceController: WKInterfaceController {
-    var questionOrAnswer: Bool = true
+class InterfaceController: WKInterfaceController, WCSessionDelegate {
+    var answerIsHidden = true
+    var session: WCSession!
+    var currentQid: NSNumber?
     
     let kAppGroupIdentifier = "group.com.slylie.intellimentor.documents"
     var sharedContainerURL: NSURL = NSURL()
@@ -24,6 +27,9 @@ class InterfaceController: WKInterfaceController {
     @IBOutlet weak var questionButton: WKInterfaceButton!
     @IBOutlet weak var questionImage: WKInterfaceImage!
     @IBOutlet weak var questionLabel: WKInterfaceLabel!
+    @IBOutlet var answerLabel: WKInterfaceLabel!
+    @IBOutlet var nextDueDate: WKInterfaceLabel!
+    
     
     override func awakeWithContext(context: AnyObject?) {
         super.awakeWithContext(context)
@@ -31,49 +37,48 @@ class InterfaceController: WKInterfaceController {
         // Configure interface objects here.
     }
     
-    func refreshControls() {
-        sharedContainerURL = NSFileManager.defaultManager().containerURLForSecurityApplicationGroupIdentifier(kAppGroupIdentifier)! // eg shared documents
-        docURL = sharedContainerURL.URLByAppendingPathComponent("question.json")
-        
-        json = JSON(data: NSData(contentsOfURL: docURL!)!)
-        
-        qid = json!["qid"].stringValue
-        
-        let questionString = json!["Question"].stringValue
-        
-        questionLabel.setText(questionString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
-        questionButton.setTitle("Show Answer")
-        
-        questionImage.setHidden(true)
-        
-        if json!["qImage"].stringValue == "(null)" {
-            json!["qImage"].stringValue = ""
+    func sendAnswerToiPhone(accuracy: Bool) {
+        if (WCSession.isSupported()) {
+            session = WCSession.defaultSession()
+            session.delegate = self
+            session.activateSession()
         }
         
-        if json!["aImage"].stringValue == "(null)" {
-            json!["aImage"].stringValue == ""
+        var answerData: [String: AnyObject] = ["messageType": "sendAnswer"]
+        answerData["accuracy"] = accuracy
+        
+        if self.currentQid != nil {
+            answerData["qid"] = currentQid
         }
         
-        if (!json!["qImage"].stringValue.isEmpty) {
-        //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-            let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["qImage"].stringValue)
-            
-            if let data = NSData(contentsOfURL: getImagePath) { //make sure your image in this url does exist, otherwise unwrap in a if let check            
-                var img = UIImage(data: data)
-                questionImage.setImage(img)
-                questionImage.setHidden(false)
+        session.sendMessage(answerData, replyHandler: {(reply: [String : AnyObject]) -> Void in
+            if let nextDue = reply["nextdue"] as? String
+            {
+                self.setNextDueDisplay(nextDue)
             }
-        }
-        questionOrAnswer = true
+            }, errorHandler:
+            {
+                (error ) -> Void in
+                // catch any errors here
+            }
+        )
+        getQuestionFromiPhone()
     }
 
+    
+    func setNextDueDisplay(nextDue: String) {
+        self.nextDueDate.setHidden(false)
+        self.nextDueDate.setText(nextDue)
+    }
+    
+
+
+    
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
-        let requestInfo: [NSObject: AnyObject] = [NSString(string: "accuracy"): NSString(string: "start")]
-        WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
-            self.refreshControls()
-        }
+        
+        self.getQuestionFromiPhone()
     }
 
     override func didDeactivate() {
@@ -81,76 +86,111 @@ class InterfaceController: WKInterfaceController {
         super.didDeactivate()
     }
 
-    @IBAction func showAnswerButton() {
-        if questionOrAnswer {
-            questionOrAnswer = !questionOrAnswer
-            
-            let answerString = json!["Answer"].stringValue
-            questionLabel.setText(answerString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
-            
-            if (!(json!["aImage"].stringValue.isEmpty || json!["aImage"].stringValue == "(null)")) {
-                //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-                let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["aImage"].stringValue)
-                
-                let data = NSData(contentsOfURL: getImagePath) //make sure your image in this url does exist, otherwise unwrap in a if let check
-                var img = UIImage(data: data!)
-                questionImage.setImage(img)
-                questionImage.setHidden(false)
-            } else {
-                questionImage.setHidden(true)
-            }
-            questionButton.setTitle("Show Question")
-        } else {
-            questionOrAnswer = !questionOrAnswer
-            
-            let questionString = json!["Question"].stringValue
-            questionLabel.setText(questionString.stringByReplacingOccurrencesOfString("<br/>", withString: "\n"))
-            
-            if (!(json!["qImage"].stringValue.isEmpty  || json!["qImage"].stringValue == "(null)")) {
-                //    let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! NSString
-                let getImagePath = sharedContainerURL.URLByAppendingPathComponent(json!["qImage"].stringValue)
-                
-                let data = NSData(contentsOfURL: getImagePath) //make sure your image in this url does exist, otherwise unwrap in a if let check
-                var img = UIImage(data: data!)
-                questionImage.setImage(img)
-                questionImage.setHidden(false)
-            } else {
-                questionImage.setHidden(true)
-            }
-            questionButton.setTitle("Show Answer")
-        }
+    @IBAction func deleteCurrentQuestion() {
+     /*   let requestInfo: [String: AnyObject] = [
+            "qid": qid!,
+            "accuracy": "delete"
+        ]
         
+        session.sendMessage(requestInfo, replyHandler: {(_: [String : AnyObject]) -> Void in
+            self.refreshControls()
+            }, errorHandler:  {(error ) -> Void in
+                
+        })
+        
+        /*WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject], error: NSError?) -> Void in
+            self.refreshControls()
+        }*/*/
+    }
+    
+    @IBAction func showAnswerButton() {
+        if answerIsHidden {
+            questionButton.setTitle("Show Question")
+            answerLabel.setHidden(false)
+            questionImage.setHidden(false)
+        } else {
+            questionButton.setTitle("Show Answer")
+            answerLabel.setHidden(true)
+        }
+        answerIsHidden = !answerIsHidden
     }
     
     @IBAction func correctAnswer() {
-        let requestInfo: [NSObject: AnyObject] = [
-            "qid": qid!,
-            "accuracy": "true"
-        ]
-        WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
-            self.refreshControls()
-        }
+      sendAnswerToiPhone(true)
     }
     
     @IBAction func incorrectAnswer() {
-        let requestInfo: [NSObject: AnyObject] = [
-            "qid": qid!,
-            "accuracy": "false"
-        ]
-        WKInterfaceController.openParentApplication(requestInfo) { (replyInfo: [NSObject: AnyObject]!, error: NSError!) -> Void in
-            self.refreshControls()
-        }
+     sendAnswerToiPhone(false)
     }
     
     override func handleActionWithIdentifier(identifier: String?, forLocalNotification localNotification: UILocalNotification) {
-        pushControllerWithName("mainInterface", context: nil)
+//        pushControllerWithName("mainInterface", context: nil)
     }
     
     override func handleActionWithIdentifier(identifier: String?, forRemoteNotification remoteNotification: [NSObject : AnyObject]) {
-        pushControllerWithName("mainInterface", context: nil)
+//        pushControllerWithName("mainInterface", context: nil)
     }
     
     func processActionWithIdentifier(identifier: String?, withUserInfo userInfo: [NSObject: AnyObject]) {
-        pushControllerWithName("mainInterface", context: nil)
+ //       pushControllerWithName("mainInterface", context: nil)
     }
+    
+    func getQuestionFromiPhone() {
+        if (WCSession.isSupported()) {
+            session = WCSession.defaultSession()
+            session.delegate = self
+            session.activateSession()
+        }
+        
+        let applicationData = ["messageType": "getQuestion"]
+        
+        session.sendMessage(applicationData, replyHandler: {(reply: [String : AnyObject]) -> Void in
+            if let question = reply["question"] as? String,
+                let answer = reply["answer"] as? String,
+                let qImage = reply["qImage"] as? String,
+                let aImage = reply["aImage"] as? String,
+                let qid = reply["qid"] as? NSNumber
+            {
+                self.setDisplay(question, answer: answer, qImage: qImage, aImage: aImage)
+                self.currentQid = qid
+            }
+            }, errorHandler:
+            {
+                (error ) -> Void in
+                // catch any errors here
+            }
+        )
+    }
+    
+    func setDisplay(question: String, answer: String, qImage: String, aImage: String) {
+        questionImage.setImage(nil)
+        questionImage.setHidden(true)
+        if !question.isEmpty {
+            self.questionLabel.setHidden(false)
+            self.questionLabel.setText(question)
+        } else {
+            self.questionLabel.setHidden(true)
+        }
+        if !answer.isEmpty {
+            self.answerLabel.setText(answer)
+        } else {
+            self.answerLabel.setHidden(true)
+        }
+        if !qImage.isEmpty {
+            var qImageNew = qImage.stringByReplacingOccurrencesOfString(".svg", withString: "")
+            qImageNew = qImageNew.stringByReplacingOccurrencesOfString(".gif", withString: "")
+            questionImage.setImageNamed(qImageNew)
+            questionImage.setHidden(false)
+        }
+        if !aImage.isEmpty {
+            var aImageNew = aImage.stringByReplacingOccurrencesOfString(".svg", withString: "")
+            aImageNew = aImageNew.stringByReplacingOccurrencesOfString(".gif", withString: "")
+            questionImage.setImageNamed(aImageNew)
+            questionImage.setHidden(true)
+        }
+        self.answerLabel.setHidden(true)
+        answerIsHidden = true
+    }
+    
+
 }
